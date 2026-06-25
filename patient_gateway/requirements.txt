@@ -2,5 +2,6 @@ Django==6.0.6
 djangorestframework==3.17.1
 psycopg2-binary==2.9.12
 python-dotenv==1.2.2
-
-#test
+cryptography==49.0.0
+celery==5.6.3
+redis==8.0.1
