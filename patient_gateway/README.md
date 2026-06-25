@@ -179,10 +179,7 @@ curl http://localhost:8000/api/v1/patients/<patient_id>/ \
 The SSN comes back masked (`***-**-3456`), the passport number isn't returned at
 all, and the access is recorded in the audit log.
 
-## Tests
 
-```bash
-python manage.py test
 ```
 
 ## Design decisions
