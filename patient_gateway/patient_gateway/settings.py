@@ -81,6 +81,10 @@ WSGI_APPLICATION = 'patient_gateway.wsgi.application'
 
 AUTH_USER_MODEL = 'api.User'
 
+# Keep the api app's migrations in a top-level package (patient_gateway/migrations/),
+# alongside models/ and jobs/, rather than inside the app.
+MIGRATION_MODULES = {'api': 'patient_gateway.migrations'}
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -171,8 +175,14 @@ REDIS_URL = os.environ['REDIS_URL']
 
 
 # Email
-# The welcome email is written to the console in development. Point this at a
-# real SMTP backend (or transactional email provider) in production.
+# EMAIL_BACKEND selects the transport: the console backend for local dev, or the
+# SMTP backend to actually send mail. The SMTP_* values are only used by the
+# SMTP backend, so they fall back to sensible defaults / blanks when unset.
 
 EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
