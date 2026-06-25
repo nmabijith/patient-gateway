@@ -1,17 +1,20 @@
-"""Authentication endpoints (JWT).
+"""Authentication endpoints (JWT)."""
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-These subclass Simple JWT's generic views so the routes are owned by this app
-and remain a natural place to customise the request/response contract later
-(e.g. returning user details alongside the tokens). Both views are public --
-Simple JWT applies ``AllowAny`` regardless of the project-wide default of
-``IsAuthenticated``.
-"""
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .auth_biz import store_tokens_for_user
 
 
 class LoginView(TokenObtainPairView):
-    """Authenticate with username + password; returns an access/refresh pair."""
+    """Authenticate with username + password and return an access/refresh pair.
 
+    The issued tokens are also stored in Redis (keyed by user). Public endpoint:
+    Simple JWT applies AllowAny regardless of the project-wide default.
+    """
 
-class TokenRefreshAPIView(TokenRefreshView):
-    """Exchange a valid refresh token for a new access token."""
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        store_tokens_for_user(serializer.user, serializer.validated_data)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)

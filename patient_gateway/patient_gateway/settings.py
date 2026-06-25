@@ -163,6 +163,13 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TIMEZONE = TIME_ZONE
 
 
+# Redis
+# Used to store issued JWTs (keyed by user) with a TTL matching the token
+# lifetime. A dedicated DB index keeps it separate from the Celery broker.
+
+REDIS_URL = os.environ['REDIS_URL']
+
+
 # Email
 # The welcome email is written to the console in development. Point this at a
 # real SMTP backend (or transactional email provider) in production.

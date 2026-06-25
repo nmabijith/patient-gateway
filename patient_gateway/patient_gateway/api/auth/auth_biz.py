@@ -1,15 +1,18 @@
-"""Business logic for authentication.
+"""Business logic for authentication."""
+from django.conf import settings
 
-Thin helpers around Simple JWT so token issuance lives in one place and can be
-reused (e.g. after user registration) rather than being tied to a single view.
-"""
-from rest_framework_simplejwt.tokens import RefreshToken
+from patient_gateway.utilities.redis_client import get_redis_client
 
 
-def issue_tokens_for_user(user):
-    """Return a fresh ``{access, refresh}`` JWT pair for the given user."""
-    refresh = RefreshToken.for_user(user)
-    return {
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    }
+def _ttl_seconds(key):
+    return int(settings.SIMPLE_JWT[key].total_seconds())
+
+
+def store_tokens_for_user(user, tokens):
+    """Store the issued JWTs in Redis, keyed by user, each expiring with the
+    token it holds."""
+    client = get_redis_client()
+    pipe = client.pipeline()
+    pipe.set(f'jwt:access:{user.id}', tokens['access'], ex=_ttl_seconds('ACCESS_TOKEN_LIFETIME'))
+    pipe.set(f'jwt:refresh:{user.id}', tokens['refresh'], ex=_ttl_seconds('REFRESH_TOKEN_LIFETIME'))
+    pipe.execute()
